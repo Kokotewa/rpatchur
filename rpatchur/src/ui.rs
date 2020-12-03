@@ -139,17 +139,33 @@ pub fn build_webview<'a>(
 fn handle_play(webview: &mut WebView<WebViewUserData>) {
     let client_exe: &String = &webview.user_data().patcher_config.play.path;
     let client_argument: &String = &webview.user_data().patcher_config.play.argument;
+    let exit_on_success = webview
+        .user_data()
+        .patcher_config
+        .play
+        .exit_on_success
+        .unwrap_or(false);
     if cfg!(target_os = "windows") {
         #[cfg(windows)]
         match windows::spawn_elevated_win32_process(client_exe, client_argument) {
-            Ok(_) => log::trace!("Client started."),
+            Ok(_) => {
+                log::trace!("Client started");
+                if exit_on_success {
+                    webview.exit();
+                }
+            }
             Err(e) => {
                 log::warn!("Failed to start client: {}", e);
             }
         }
     } else {
         match Command::new(client_exe).arg(client_argument).spawn() {
-            Ok(child) => log::trace!("Client started: pid={}", child.id()),
+            Ok(child) => {
+                log::trace!("Client started: pid={}", child.id());
+                if exit_on_success {
+                    webview.exit();
+                }
+            }
             Err(e) => {
                 log::warn!("Failed to start client: {}", e);
             }
@@ -163,17 +179,33 @@ fn handle_play(webview: &mut WebView<WebViewUserData>) {
 fn handle_setup(webview: &mut WebView<WebViewUserData>) {
     let setup_exe: &String = &webview.user_data().patcher_config.setup.path;
     let setup_argument: &String = &webview.user_data().patcher_config.setup.argument;
+    let exit_on_success = webview
+        .user_data()
+        .patcher_config
+        .setup
+        .exit_on_success
+        .unwrap_or(false);
     if cfg!(target_os = "windows") {
         #[cfg(windows)]
         match windows::spawn_elevated_win32_process(setup_exe, setup_argument) {
-            Ok(_) => log::trace!("Setup software started."),
+            Ok(_) => {
+                log::trace!("Setup software started");
+                if exit_on_success {
+                    webview.exit();
+                }
+            }
             Err(e) => {
                 log::warn!("Failed to start setup software: {}", e);
             }
         }
     } else {
         match Command::new(setup_exe).arg(setup_argument).spawn() {
-            Ok(child) => log::trace!("Setup software started: pid={}", child.id()),
+            Ok(child) => {
+                log::trace!("Setup software started: pid={}", child.id());
+                if exit_on_success {
+                    webview.exit();
+                }
+            }
             Err(e) => {
                 log::warn!("Failed to start setup software: {}", e);
             }
